@@ -863,12 +863,18 @@ class RhythmGame:
         screen.blit(info2, info2_rect)
 
     def save_score(self, player_name):
-        cursor.execute('''UPDATE users SET score = ? WHERE userName = ?''', (self.score, player_name))
-        conn.commit()
-
+        # 이전 점수보다 높을 때만 저장
+        current_score = self.score
+        cursor.execute('''SELECT score FROM users WHERE userName = ?''', (player_name,))
+        result = cursor.fetchone()
+        if result:
+            previous_score = result[0]
+            if current_score > previous_score:
+                cursor.execute('''UPDATE users SET score = ? WHERE userName = ?''', (current_score, player_name))
+                conn.commit()
 
 # 메인 게임 루프
-def main(status, name):
+def main(status="guest", name=""):
     game = RhythmGame()
     running = True
 
@@ -892,7 +898,7 @@ def main(status, name):
                 elif event.key == pygame.K_r and game.state != GameState.PLAYING:
                     # 결과 화면에서 R → 재시작
                     running = False
-                    restart_game()
+                    restart_game(status, name)
                     return
                 elif game.state == GameState.PLAYING:
                     game.handle_input(event.key)
@@ -919,7 +925,7 @@ def main(status, name):
     sys.exit()
 
 
-def restart_game():
+def restart_game(status="guest", name=""):
     """게임 재시작"""
     import os
 
@@ -931,7 +937,7 @@ def restart_game():
 
     # pythonw 사용
     pythonw = sys.executable.replace("python.exe", "pythonw.exe")
-    subprocess.Popen([pythonw, game_path])
+    subprocess.Popen([pythonw, game_path, status, name])
 
 
 def return_to_menu():
@@ -954,5 +960,7 @@ def return_to_menu():
         subprocess.Popen([sys.executable, main_path])
 
 if __name__ == "__main__":
-    main()
-
+# 커맨드 라인 인자로 status와 name을 받음
+    status = sys.argv[1]  # 첫 번째 인자
+    name = sys.argv[2] 
+    main(status, name)
