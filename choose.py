@@ -13,7 +13,6 @@ HEIGHT = 600
 LEFT_IMAGE_PATH = "./images/doyo.gif"
 RIGHT_IMAGE_PATH = "./images/peacock.gif"
 BACKGROUND_PATH = "./images/menuBackground.png"
-BGM_PATH = "./sounds/howToStop!!!!!!!!!.mp3"
 
 root = tk.Tk()
 root.title("Dancing Doyo")
@@ -56,40 +55,36 @@ except:
     canvas.configure(bg="#1a1a2e")
     print("배경 이미지를 찾을 수 없습니다.")
 
-# ----------------------------
-# 🎵 BGM 재생 (페이드인)
-# ----------------------------
-pygame.mixer.init()
-bgm_loaded = False
-try:
-    pygame.mixer.music.load(BGM_PATH)
-    pygame.mixer.music.set_volume(0.0)
-    pygame.mixer.music.play(-1)
-    bgm_loaded = True
-except:
-    print("BGM 파일을 찾을 수 없습니다.")
+
+# 커스텀 버튼 스타일
+style = ttk.Style()
+style.theme_use('clam')
+style.configure('TopMenu.TButton',
+                background='#2d2d44',
+                foreground='white',
+                borderwidth=0,
+                focuscolor='none',
+                font=('맑은 고딕', 10))
+style.map('TopMenu.TButton',
+          background=[('active', '#3d3d54')])
 
 
-def fade_in_bgm(volume=0.0):
-    """BGM 페이드인"""
-    if bgm_loaded and volume < 0.5:
-        volume += 0.02
-        pygame.mixer.music.set_volume(volume)
-        root.after(50, lambda: fade_in_bgm(volume))
+def login_pressed():
+    """로그인 화면"""
+    # 버튼 비활성화
+    login_button.config(state='disabled')
 
-
-# BGM 페이드인 시작
-root.after(500, fade_in_bgm)
+    # 페이드아웃 효과
+    fade_out_and_login()
 
 # ----------------------------
 # 오른쪽 상단 버튼들
 # ----------------------------
 
 def open_about():
-    """About Game 화면 열기"""
-    pygame.mixer.music.stop()
+    """Ranking 화면 열기"""
     root.destroy()
-    subprocess.Popen([sys.executable, "about.py"])
+    subprocess.Popen([sys.executable, "ranking.py"])
 
 
 # 오른쪽 상단 프레임
@@ -108,18 +103,18 @@ style.configure('TopMenu.TButton',
 style.map('TopMenu.TButton',
           background=[('active', '#3d3d54')])
 
-about_button = ttk.Button(top_right_frame, text="About Game",
+ranking_button = ttk.Button(top_right_frame, text="랭킹 보기",
                           command=open_about,
                           style='TopMenu.TButton')
-about_button.pack(ipadx=15, ipady=5)
+ranking_button.pack(ipadx=15, ipady=5)
 
-def choose_pressed():
-    """선택창 이동"""
+def start_pressed():
+    """게임 시작"""
     # 버튼 비활성화
-    start_button.config(state='disabled')
+    login_button.config(state='disabled')
 
     # 페이드아웃 효과
-    fade_out_and_choose()
+    fade_out_and_start()
 
 
 # ----------------------------
@@ -137,11 +132,11 @@ try:
 except:
     # 이미지 없으면 텍스트로 대체
     logo_img = canvas.create_text(WIDTH//2, HEIGHT//2 - 100,
-                                  text="Dancing Doyo",
+                                  text="Play Style",
                                   font=("맑은 고딕", 48, "bold"),
                                   fill="#ffffff")
 
-# 시작 버튼 스타일
+# Login 버튼 스타일 
 style.configure('Start.TButton',
                 background='#6c5ce7',
                 foreground='white',
@@ -152,35 +147,47 @@ style.configure('Start.TButton',
 style.map('Start.TButton',
           background=[('active', '#5f4dd1')])
 
-start_button = ttk.Button(canvas, text="시작하기",
-                         command=choose_pressed,
+login_button = ttk.Button(canvas, text="Login",
+                         command=login_pressed,
                          style='Start.TButton')
-start_button_window = canvas.create_window(WIDTH//2, HEIGHT//2,
-                                          window=start_button)
+login_button_window = canvas.create_window(WIDTH//2, HEIGHT//2,
+                                          window=login_button)
+
+# Guest 버튼 스타일 
+style.configure('Start.TButton',
+                background='#6c5ce7',
+                foreground='white',
+                borderwidth=0,
+                focuscolor='none',
+                font=('맑은 고딕', 16, 'bold'),
+                padding=10)
+style.map('Start.TButton',
+          background=[('active', '#5f4dd1')])
+
+guest_button = ttk.Button(canvas, text="Guest",
+                         command=start_pressed,
+                         style='Start.TButton')
+guest_button_window = canvas.create_window(WIDTH//2, HEIGHT//2+60,
+                                          window=guest_button)
 
 
 
+def fade_out_and_start(volume=0.5):
+    """페이드아웃 후 게임 시작"""
+    root.destroy()
 
-def fade_out_and_choose(volume=0.5):
-    """페이드아웃 후 선택창으로 이동"""
-    if bgm_loaded and volume > 0:
-        volume -= 0.05
-        pygame.mixer.music.set_volume(max(0, volume))
-        root.after(30, lambda: fade_out_and_choose(volume))
-    else:
-        # 음악 완전 정리
-        pygame.mixer.music.stop()
-        pygame.mixer.music.unload()  # 추가!
-        pygame.mixer.quit()  # 추가!
+    # 잠깐 대기 후 게임 실행
+    import time
+    time.sleep(0.1)
 
-        root.destroy()
+    import game
+    game.main("guest", "Guest")
 
-        # 잠깐 대기 후 선택화면
-        import time
-        time.sleep(0.1)
 
-        """choose 화면 열기"""
-        subprocess.Popen([sys.executable, "choose.py"])
+def fade_out_and_login(volume=0.5):
+    """Login 화면 열기"""
+    root.destroy()
+    subprocess.Popen([sys.executable, "login.py"])
 
 # 제목과 버튼 페이드인
 center_frame_alpha = 0.0
@@ -193,7 +200,8 @@ def fade_in_ui():
         center_frame_alpha += 0.05
         y_offset = int((1.0 - center_frame_alpha) * 30)
         canvas.coords(logo_img, WIDTH//2, HEIGHT//2 - 100 + y_offset)
-        canvas.coords(start_button_window, WIDTH//2, HEIGHT//2 + y_offset)
+        canvas.coords(login_button_window, WIDTH//2, HEIGHT//2 + y_offset)
+        canvas.coords(guest_button_window, WIDTH//2, HEIGHT//2 + y_offset+60)
         root.after(30, fade_in_ui)
 
 root.after(200, fade_in_ui)
@@ -244,8 +252,6 @@ right_gif = AnimatedGIF(canvas, RIGHT_IMAGE_PATH, WIDTH - 30 - 150, HEIGHT - 30 
 # ----------------------------
 
 def on_escape(event):
-    if bgm_loaded:
-        pygame.mixer.music.stop()
     root.destroy()
 
 

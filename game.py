@@ -4,6 +4,11 @@ import sys
 import subprocess
 from PIL import Image, ImageSequence
 import os
+import sqlite3
+
+# DB 연결
+conn = sqlite3.connect('signUp.db')
+cursor = conn.cursor()
 
 os.environ['SDL_VIDEO_WINDOW_POS'] = 'center'  # 중앙 배치
 os.environ['SDL_VIDEO_CENTERED'] = '1'
@@ -857,9 +862,13 @@ class RhythmGame:
         info2_rect = info2.get_rect(center=(WIDTH // 2, HEIGHT - 30))
         screen.blit(info2, info2_rect)
 
+    def save_score(self, player_name):
+        cursor.execute('''UPDATE users SET score = ? WHERE userName = ?''', (self.score, player_name))
+        conn.commit()
+
 
 # 메인 게임 루프
-def main():
+def main(status, name):
     game = RhythmGame()
     running = True
 
@@ -900,6 +909,9 @@ def main():
                 game.draw(screen)
         else:
             game.draw_result(screen)
+            # 로그인 후 게임 종료 시 점수 저장
+            if status == "login":
+                game.save_score(name)
 
         pygame.display.flip()
 
@@ -943,3 +955,4 @@ def return_to_menu():
 
 if __name__ == "__main__":
     main()
+

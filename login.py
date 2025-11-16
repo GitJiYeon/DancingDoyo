@@ -3,6 +3,14 @@ from tkinter import ttk, messagebox
 import subprocess
 import sys
 import os
+import sqlite3
+
+# DB 연결
+conn = sqlite3.connect('signUp.db')
+
+# 커서 연결
+cursor = conn.cursor()
+
 
 # 창 크기
 WIDTH = 900
@@ -83,19 +91,33 @@ style.map('Back.TButton',
 
 def login():
     """로그인 처리"""
-    username = id_entry.get()
+    userId = id_entry.get()
     password = pw_entry.get()
 
-    if not username or not password:
+    if not userId or not password:
         messagebox.showwarning("경고", "아이디와 비밀번호를 입력해주세요.")
         return
 
-    # 임시 로그인 (실제로는 서버 연동 필요)
-    if username == "admin" and password == "1234":
+    # 로그인
+    cursor.execute("SELECT userId, password FROM users WHERE userId = ? AND password = ?", (userId, password))
+    conn.commit()
+    result = cursor.fetchone() # 없으면 None 반환
+
+    if result:
         messagebox.showinfo("성공", "로그인 성공!")
-        go_back()
+        start_pressed()
     else:
         messagebox.showerror("실패", "아이디 또는 비밀번호가 틀렸습니다.")
+
+
+def signUp():
+    """회원가입 메뉴로 이동"""
+    root.destroy()
+
+    script_dir = os.path.dirname(os.path.abspath(__file__))
+    main_path = os.path.join(script_dir, "signUp.py")
+    pythonw = sys.executable.replace("python.exe", "pythonw.exe")
+    subprocess.Popen([pythonw, main_path])
 
 
 def go_back():
@@ -107,6 +129,31 @@ def go_back():
     pythonw = sys.executable.replace("python.exe", "pythonw.exe")
     subprocess.Popen([pythonw, main_path])
 
+def start_pressed():
+    """게임 시작"""
+    # 버튼 비활성화
+    login_button.config(state='disabled')
+
+    # 페이드아웃 효과
+    fade_out_and_start()
+
+def fade_out_and_start(volume=0.5):
+    userId = id_entry.get()
+    """페이드아웃 후 게임 시작"""
+    root.destroy()
+
+    # 잠깐 대기 후 게임 실행
+    import time
+    time.sleep(0.1)
+
+    # 사용자 이름 전달
+    cursor.execute("SELECT userName FROM users WHERE userId = ?", (userId,))
+    conn.commit()
+    name = cursor.fetchone()[0]
+
+    import game
+    game.main("login", name)
+
 
 # 로그인 버튼
 login_button = ttk.Button(login_frame, text="로그인",
@@ -114,16 +161,24 @@ login_button = ttk.Button(login_frame, text="로그인",
                           style='Login.TButton')
 login_button.pack(ipadx=40, ipady=5)
 
+# 회원가입 버튼
+signUp_button = ttk.Button(login_frame, text="→ 회원가입",
+                         command=signUp,
+                         style='Back.TButton')
+signUp_button.pack(pady=(20, 0), ipadx=20)
+
 # 돌아가기 버튼
 back_button = ttk.Button(login_frame, text="← 돌아가기",
                          command=go_back,
                          style='Back.TButton')
-back_button.pack(pady=(20, 0), ipadx=20)
+back_button.pack(pady=(10, 0), ipadx=20)
 
 # Enter 키로 로그인
 pw_entry.bind('<Return>', lambda e: login())
 
 # ESC 키로 돌아가기
 root.bind('<Escape>', lambda e: go_back())
-
 root.mainloop()
+
+# DB 연결 종료
+conn.close()
