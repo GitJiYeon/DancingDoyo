@@ -200,16 +200,16 @@ class RhythmGame:
         self.opponent_gif = self.opponent_gif_normal
 
         self.opponent2_gif_normal = AnimatedSprite("./images/pla.gif", 210, 210)
-        self.opponent2_gif_up = AnimatedSprite("./images/pla.gif", 210, 210)
-        self.opponent2_gif_down = AnimatedSprite("./images/pla.gif", 210, 210)
-        self.opponent2_gif_left = AnimatedSprite("./images/pla.gif", 210, 210)
-        self.opponent2_gif_right = AnimatedSprite("./images/pla.gif", 210, 210)
+        self.opponent2_gif_up = AnimatedSprite("./images/pla_up.gif", 210, 210)
+        self.opponent2_gif_down = AnimatedSprite("./images/pla_down.gif", 210, 210)
+        self.opponent2_gif_left = AnimatedSprite("./images/pla_left.gif", 210, 210)
+        self.opponent2_gif_right = AnimatedSprite("./images/pla_right.gif", 210, 210)
 
-        self.opponent3_gif_normal = AnimatedSprite("./images/gugu.gif", 210, 210)
-        self.opponent3_gif_up = AnimatedSprite("./images/gugu_up.gif", 210, 210)
-        self.opponent3_gif_down = AnimatedSprite("./images/gugu_down.gif", 210, 210)
-        self.opponent3_gif_left = AnimatedSprite("./images/gugu_left.gif", 210, 210)
-        self.opponent3_gif_right = AnimatedSprite("./images/gugu_right.gif", 210, 210)
+        self.opponent3_gif_normal = AnimatedSprite("./images/peacock.gif", 210, 210)
+        self.opponent3_gif_up = AnimatedSprite("./images/peacock_up.gif", 210, 210)
+        self.opponent3_gif_down = AnimatedSprite("./images/peacock_down.gif", 210, 210)
+        self.opponent3_gif_left = AnimatedSprite("./images/peacock_left.gif", 210, 210)
+        self.opponent3_gif_right = AnimatedSprite("./images/peacock_right.gif", 210, 210)
 
         self.opponent4_gif_normal = AnimatedSprite("./images/pla.gif", 210, 210)
         self.opponent4_gif_up = AnimatedSprite("./images/pla.gif", 210, 210)
@@ -527,8 +527,8 @@ class RhythmGame:
                 self.combo = 0
                 self.notes.remove(note)
 
-                # 10번 이상 miss면 게임오버
-                if self.miss_count >= 10:
+                # 5번 이상 miss면 게임오버
+                if self.miss_count >= 5:
                     self.state = GameState.GAME_OVER
                     pygame.mixer.music.stop()
 
@@ -767,8 +767,8 @@ class RhythmGame:
 
 
         # Miss 카운트 (하단 중앙)
-        miss_color = RED if self.miss_count >= 7 else WHITE
-        miss_text = font_medium.render(f"Miss: {self.miss_count}/10", True, miss_color)
+        miss_color = RED if self.miss_count >= 4 else WHITE
+        miss_text = font_medium.render(f"Miss: {self.miss_count}/5", True, miss_color)
         miss_rect = miss_text.get_rect(center=(WIDTH // 2, HEIGHT - 30))
         screen.blit(miss_text, miss_rect)
 
