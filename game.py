@@ -211,11 +211,11 @@ class RhythmGame:
         self.opponent3_gif_left = AnimatedSprite("./images/peacock_left.gif", 210, 210)
         self.opponent3_gif_right = AnimatedSprite("./images/peacock_right.gif", 210, 210)
 
-        self.opponent4_gif_normal = AnimatedSprite("./images/pla.gif", 210, 210)
-        self.opponent4_gif_up = AnimatedSprite("./images/pla.gif", 210, 210)
-        self.opponent4_gif_down = AnimatedSprite("./images/pla.gif", 210, 210)
-        self.opponent4_gif_left = AnimatedSprite("./images/pla.gif", 210, 210)
-        self.opponent4_gif_right = AnimatedSprite("./images/pla.gif", 210, 210)
+        self.opponent4_gif_normal = AnimatedSprite("./images/ak.gif", 210, 210)
+        self.opponent4_gif_up = AnimatedSprite("./images/ak_up.gif", 210, 210)
+        self.opponent4_gif_down = AnimatedSprite("./images/ak_down.gif", 210, 210)
+        self.opponent4_gif_left = AnimatedSprite("./images/ak_left.gif", 210, 210)
+        self.opponent4_gif_right = AnimatedSprite("./images/ak_right.gif", 210, 210)
 
         # 판정 이미지
         self.judgment_perfect = pygame.image.load("./images/logo/perfect.png")
@@ -228,7 +228,7 @@ class RhythmGame:
         self.judgment_normal = pygame.transform.scale(self.judgment_normal, (160, 80))
 
         # 엔딩 GIF
-        self.ending_gif = AnimatedSprite("./images/gugu.gif", 600, 400)
+        self.ending_gif = AnimatedSprite("./images/background/ending.gif", 600, 400)
         self.ending_started = False
         self.ending_start_time = 0
         self.ending_duration = 5000
